@@ -6,6 +6,58 @@
 <meta name="viewport" content="width=device-width,initial-scale=1" />
 <title>Fisica 2 — Quiz Appelli</title>
 <style>
+    #loginScreen{
+  position:fixed;
+  inset:0;
+  z-index:99999;
+  background:#f6f7fb;
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  padding:20px;
+}
+
+.loginBox{
+  width:100%;
+  max-width:400px;
+  background:white;
+  border:1px solid #dde3ea;
+  border-radius:18px;
+  padding:30px;
+  box-shadow:0 8px 26px rgba(25,35,50,.10);
+  text-align:center;
+}
+
+.loginBox h2{
+  margin-top:0;
+}
+
+.loginBox input{
+  width:100%;
+  padding:13px;
+  margin:15px 0 10px;
+  border:1px solid #dde3ea;
+  border-radius:11px;
+  font-size:16px;
+}
+
+.loginBox button{
+  width:100%;
+  border:0;
+  border-radius:12px;
+  padding:12px;
+  background:#2563eb;
+  color:white;
+  font-size:16px;
+  font-weight:bold;
+  cursor:pointer;
+}
+
+#loginError{
+  color:#b91c1c;
+  margin-top:12px;
+  display:none;
+}
 :root{--bg:#f6f7fb;--card:#fff;--text:#17212b;--muted:#687483;--line:#dde3ea;--accent:#2563eb;--ok:#15803d;--bad:#b91c1c;--soft:#eef4ff}
 *{box-sizing:border-box}body{margin:0;font-family:Inter,ui-sans-serif,system-ui,-apple-system,Segoe UI,Roboto,Arial,sans-serif;background:var(--bg);color:var(--text)}
 .wrap{max-width:940px;margin:0 auto;padding:20px}.hero{padding:18px 0 8px}.hero h1{font-size:clamp(28px,5vw,46px);margin:0 0 7px}.hero p{color:var(--muted);margin:0;line-height:1.5}
@@ -17,6 +69,23 @@
 </style>
 </head>
 <body>
+    <div id="loginScreen">
+  <div class="loginBox">
+    <h2>Fisica 2 — Quiz</h2>
+    <p>Inserisci la password per accedere.</p>
+
+    <input
+      type="password"
+      id="passwordInput"
+      placeholder="Password"
+      autocomplete="current-password"
+    >
+
+    <button id="loginButton">Accedi</button>
+
+    <div id="loginError">Password errata.</div>
+  </div>
+</div>
 <div class="wrap">
 <header class="hero"><h1>Fisica 2 — Quiz Appelli</h1><p>Domande ricavate dai tuoi appelli e dalle foto. Crocette + esercizi numerici, con correzione e ripasso degli errori.</p></header>
 <section id="setup" class="panel">
@@ -59,5 +128,30 @@ $('#next').onclick=()=>idx===currentSet.length-1?finish():nextStep();function ne
 function updateLive(){let answered=Object.keys(checked).length,ok=currentSet.filter(q=>checked[q.id]&&isCorrect(q)).length;$('#liveScore').textContent=mode==='train'?`Corrette ${ok}/${answered}`:'Simulazione'}
 function finish(){let ok=currentSet.filter(isCorrect),wrong=currentSet.filter(q=>!isCorrect(q));let old=wrongIds().filter(id=>!ok.some(q=>q.id===id));saveWrong([...old,...wrong.map(q=>q.id)]);$('#quiz').classList.add('hidden');$('#results').classList.remove('hidden');$('#score').textContent=`${ok.length}/${currentSet.length}`;$('#summary').textContent=`${Math.round(ok.length/currentSet.length*100)}% corrette. Errori: ${wrong.length}. Gli errori vengono salvati nel browser per il ripasso.`;let rev=$('#review');rev.innerHTML='';currentSet.forEach((q,i)=>{let d=document.createElement('div');d.className='reviewitem '+(isCorrect(q)?'good':'wrong');d.innerHTML=`<strong>${i+1}. ${q.q}</strong><span>${isCorrect(q)?'✓':'✗'} ${isCorrect(q)?'Corretta':`Corretta: ${formatAns(q)}`}</span>${q.exp?`<div class="small" style="margin-top:5px">${q.exp}</div>`:''}`;rev.appendChild(d)});window.scrollTo({top:0,behavior:'smooth'})}
 $('#restart').onclick=()=>{location.reload()};$('#retryWrong').onclick=()=>{let w=currentSet.filter(q=>!isCorrect(q)); if(!w.length){alert('Nessun errore da rifare.');return}begin(shuffle(w))};
+const SITE_PASSWORD = "BEATRICESNOB52";
+
+function login() {
+  const entered = document.getElementById("passwordInput").value;
+
+  if (entered === SITE_PASSWORD) {
+    document.getElementById("loginScreen").style.display = "none";
+    sessionStorage.setItem("fisica2_logged", "yes");
+  } else {
+    document.getElementById("loginError").style.display = "block";
+  }
+}
+
+document.getElementById("loginButton").addEventListener("click", login);
+
+document.getElementById("passwordInput").addEventListener("keydown", function(event) {
+  if (event.key === "Enter") {
+    login();
+  }
+});
+
+if (sessionStorage.getItem("fisica2_logged") === "yes") {
+  document.getElementById("loginScreen").style.display = "none";
+}
+
 </script>
 </body></html>
